@@ -1,5 +1,5 @@
-#include "exam_readfile.h"
+#include "exam_read_air_data.h"
 
 int main() {
-    return exam_readfile_main();
+    return exam_read_air_data();
 }
