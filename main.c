@@ -2,10 +2,12 @@
 #include "air_data.h"
 #include "regression.h"
 
+#define FILENAME "air.csv"
+
 #define DATA_SIZE 16
 
 int main() {
-    char *filename = "air.csv";
+    char *filename = FILENAME;
 
     int data_size = DATA_SIZE;
     DailyAirData data[data_size];
