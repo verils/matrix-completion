@@ -5,13 +5,13 @@
 
 #define FILENAME "air.csv"
 
-#define DATA_SIZE 50
-//#define DATA_SIZE 500000
+//#define DATA_SIZE 50
+#define CAPACITY 560000
 
 int main() {
     char *filename = FILENAME;
-
-    static DailyAirData data[DATA_SIZE];
+    static DailyAirData data[CAPACITY];
+    int size;
 
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -19,22 +19,21 @@ int main() {
         return 1;
     }
 
-    read_air_data_csv(fp, data, DATA_SIZE);
+    read_air_data_csv(fp, data, &size, CAPACITY);
 
     fclose(fp);
 
-    qsort(data, DATA_SIZE, sizeof(DailyAirData), compare_air_date);
+    printf("Air quality data size: %d\n", size);
 
-    printf("Air Quality Data: \n");
-    print_air_data(data, DATA_SIZE);
+    qsort(data, size, sizeof(DailyAirData), compare_air_date);
 
-    int aqi_data[DATA_SIZE];
-    for (int i = 0; i < DATA_SIZE; ++i) {
+    int aqi_data[size];
+    for (int i = 0; i < size; ++i) {
         aqi_data[i] = data[i].aqi;
     }
 
     float a, b;
-    least_squares_fitting(aqi_data, DATA_SIZE, &a, &b);
+    least_squares_fitting(aqi_data, size, &a, &b);
 
     printf("a=%f, b=%f", a, b);
 

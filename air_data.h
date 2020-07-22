@@ -9,8 +9,8 @@ struct DailyAirData {
 
 typedef struct DailyAirData DailyAirData;
 
-void read_air_data_csv(FILE *, DailyAirData[], int);
+void read_air_data_csv(FILE *, DailyAirData[], int *, int);
 
-int compare_air_date(const void *a, const void *b);
+int compare_air_date(const void *, const void *);
 
 void print_air_data(DailyAirData [], int);

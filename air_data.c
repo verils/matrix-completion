@@ -3,7 +3,7 @@
 #include <string.h>
 #include "air_data.h"
 
-void read_air_data_csv(FILE *fp, DailyAirData data[], int size) {
+void read_air_data_csv(FILE *fp, DailyAirData data[], int *size, int max_size) {
     int buf_size = 255;
     char buf[buf_size];
 
@@ -12,7 +12,7 @@ void read_air_data_csv(FILE *fp, DailyAirData data[], int size) {
 
     char *tok;
     int lines = 0;
-    while (fgets(buf, buf_size, fp) && lines < size) {
+    while (fgets(buf, buf_size, fp) && lines < max_size) {
         tok = strtok(buf, ",");
         int curr_col = 0;
         while (tok) {
@@ -34,6 +34,7 @@ void read_air_data_csv(FILE *fp, DailyAirData data[], int size) {
         }
         ++lines;
     }
+    *size = lines;
 }
 
 int compare_air_date(const void *a, const void *b) {
