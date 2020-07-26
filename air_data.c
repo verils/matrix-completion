@@ -1,25 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "air_data.h"
 
-void read_air_data_csv(FILE *fp, DailyAirData data[], int *size, int max_size) {
+int get_day_of_unix_epoch(char *date) {
+    int year, month, day;
+    sscanf(date, "%d/%d/%d", &year, &month, &day);
+    struct tm time_data = {0, 0, 0, day, month - 1, year - 1900};
+    time_t seconds = mktime(&time_data);
+    int days = (int) (seconds / 60 / 60 / 24);
+    return days;
+}
+
+void air_data_read_csv(DailyAirData data[], int max_size, int *size, FILE *file) {
     int buf_size = 255;
     char buf[buf_size];
 
     // Skip head line
-    fgets(buf, buf_size, fp);
+    fgets(buf, buf_size, file);
 
     char *tok;
     int lines = 0;
-    while (fgets(buf, buf_size, fp) && lines < max_size) {
+    while (fgets(buf, buf_size, file) && lines < max_size) {
         tok = strtok(buf, ",");
         int curr_col = 0;
         while (tok) {
             if (curr_col > 4) {
                 break;
             } else if (curr_col == 0) {
-                data[lines].date = strdup(tok);
+                char *date = strdup(tok);
+                data[lines].date = date;
+                data[lines].days_of_unix_epoch = get_day_of_unix_epoch(date);
             } else if (curr_col == 1) {
                 data[lines].city = strdup(tok);
             } else if (curr_col == 2) {
@@ -37,7 +49,19 @@ void read_air_data_csv(FILE *fp, DailyAirData data[], int *size, int max_size) {
     *size = lines;
 }
 
-int compare_air_date(const void *a, const void *b) {
+void air_data_filter_by_city(DailyAirData source[], DailyAirData target[], char *city, int max_size, int *size) {
+    int count = 0;
+    for (int i = 0; i < max_size; ++i) {
+        DailyAirData data = source[i];
+        int result = strcmp(data.city, city);
+        if (result == 0) {
+            target[count++] = data;
+        }
+    }
+    *size = count;
+}
+
+int air_data_compare(const void *a, const void *b) {
     DailyAirData *a_data = (DailyAirData *) a, *b_data = (DailyAirData *) b;
 
     int cmp = strcmp(a_data->city, b_data->city);
@@ -45,20 +69,22 @@ int compare_air_date(const void *a, const void *b) {
         return cmp;
     }
 
-    int a_year, a_month, a_day, b_year, b_month, b_day;
-    sscanf(a_data->date, "%d/%d/%d", &a_year, &a_month, &a_day);
-    sscanf(b_data->date, "%d/%d/%d", &b_year, &b_month, &b_day);
+    return a_data->days_of_unix_epoch - b_data->days_of_unix_epoch;
 
-    if (a_year != b_year) {
-        return a_year - b_year;
-    }
-    if (a_month != b_month) {
-        return a_month - b_month;
-    }
-    if (a_day != b_day) {
-        return a_day - b_day;
-    }
-    return 0;
+//    int a_year, a_month, a_day, b_year, b_month, b_day;
+//    sscanf(a_data->date, "%d/%d/%d", &a_year, &a_month, &a_day);
+//    sscanf(b_data->date, "%d/%d/%d", &b_year, &b_month, &b_day);
+//
+//    if (a_year != b_year) {
+//        return a_year - b_year;
+//    }
+//    if (a_month != b_month) {
+//        return a_month - b_month;
+//    }
+//    if (a_day != b_day) {
+//        return a_day - b_day;
+//    }
+//    return 0;
 }
 
 void print_air_data(DailyAirData data[], int size) {

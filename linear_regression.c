@@ -1,5 +1,5 @@
 
-void least_squares_fitting(const int *data, int size, float *theta_0, float *theta_1) {
+void least_squares_fitting(const int data[], int size, float *theta_0, float *theta_1) {
     float sum_x = 0, sum_y = 0, sum_xx = 0, sum_xy = 0, avg_x, avg_y, avg_xx, avg_xy;
     for (int i = 0; i < size; ++i) {
         sum_x += (float) i;
@@ -14,4 +14,8 @@ void least_squares_fitting(const int *data, int size, float *theta_0, float *the
 
     *theta_1 = (avg_xy - avg_x * avg_y) / (avg_xx - avg_x * avg_x);
     *theta_0 = (sum_y - *theta_1 * sum_x) / size_f;
+}
+
+void bgd_fitting(const int data[], int size, float *alpha, float *theta_0, float *theta_1) {
+
 }
