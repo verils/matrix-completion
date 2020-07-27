@@ -13,7 +13,13 @@ int get_day_of_unix_epoch(char *date) {
     return days;
 }
 
-void air_data_read_csv(DailyAirData data[], int max_size, int *size, FILE *file) {
+void air_data_read_csv(DailyAirData data[], int max_size, int *size, char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file %s", filename);
+        exit(EXIT_FAILURE);
+    }
+
     int buf_size = 255;
     char buf[buf_size];
 
@@ -47,6 +53,8 @@ void air_data_read_csv(DailyAirData data[], int max_size, int *size, FILE *file)
         ++lines;
     }
     *size = lines;
+
+    fclose(file);
 }
 
 void air_data_filter_by_city(DailyAirData source[], DailyAirData target[], char *city, int max_size, int *size) {
@@ -71,6 +79,7 @@ int air_data_compare(const void *a, const void *b) {
 
     return a_data->days_of_unix_epoch - b_data->days_of_unix_epoch;
 
+
 //    int a_year, a_month, a_day, b_year, b_month, b_day;
 //    sscanf(a_data->date, "%d/%d/%d", &a_year, &a_month, &a_day);
 //    sscanf(b_data->date, "%d/%d/%d", &b_year, &b_month, &b_day);
@@ -85,6 +94,10 @@ int air_data_compare(const void *a, const void *b) {
 //        return a_day - b_day;
 //    }
 //    return 0;
+}
+
+void air_data_sort(DailyAirData data[], int size) {
+    qsort(data, size, sizeof(DailyAirData), air_data_compare);
 }
 
 void print_air_data(DailyAirData data[], int size) {

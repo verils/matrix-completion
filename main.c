@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
 #include "air_data.h"
 #include "linear_regression.h"
@@ -16,27 +15,19 @@ int main() {
     static DailyAirData data[MAX_DATA_SIZE] = {NULL};
     int size;
 
-    FILE *fp = fopen(FILENAME, "r");
-    if (fp == NULL) {
-        printf("Error opening file %s", FILENAME);
-        exit(EXIT_FAILURE);
-    }
-    air_data_read_csv(data, MAX_DATA_SIZE, &size, fp);
-    fclose(fp);
-
-    clock_t read_file_clock = clock();
-    double read_file_duration = difftime(read_file_clock, beginning_clock);
-
+    air_data_read_csv(data, MAX_DATA_SIZE, &size, FILENAME);
     printf("Air quality data size: %d\n", size);
 
     char *first_city = data[0].city;
     static DailyAirData city_data[MAX_CITY_DATA_SIZE];
     int size_of_city = 0;
     air_data_filter_by_city(data, city_data, first_city, size, &size_of_city);
-
     printf("Air quality data size in city '%s': %d\n", first_city, size_of_city);
 
-    qsort(city_data, size_of_city, sizeof(DailyAirData), air_data_compare);
+    clock_t read_file_clock = clock();
+    double read_file_duration = difftime(read_file_clock, beginning_clock);
+
+    air_data_sort(city_data, size_of_city);
 
     clock_t sort_data_clock = clock();
     double sort_data_duration = difftime(sort_data_clock, read_file_clock);
@@ -57,10 +48,10 @@ int main() {
     double fitting_duration = difftime(fitting_clock, sort_data_clock);
     double total_duration = difftime(fitting_clock, beginning_clock);
 
-    printf("read file usage: %.2fms\n", read_file_duration);
-    printf("sort data usage: %.2fms\n", sort_data_duration);
-    printf("fitting usage: %.2fms\n", fitting_duration);
-    printf("total usage: %.2fms\n", total_duration);
+    printf("read file usage: %.2fms\n", read_file_duration * 1000 / CLOCKS_PER_SEC);
+    printf("sort data usage: %.2fms\n", sort_data_duration * 1000 / CLOCKS_PER_SEC);
+    printf("fitting usage: %.2fms\n", fitting_duration * 1000 / CLOCKS_PER_SEC);
+    printf("total usage: %.2fms\n", total_duration * 1000 / CLOCKS_PER_SEC);
 
     return 0;
 }
