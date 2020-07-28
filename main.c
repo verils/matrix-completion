@@ -7,7 +7,8 @@
 
 //#define DATA_SIZE 50
 #define MAX_DATA_SIZE 560000
-#define MAX_CITY_DATA_SIZE 1500
+//#define MAX_CITY_DATA_SIZE 1500
+#define MAX_CITY_DATA_SIZE 1200
 
 int main() {
     time_t beginning_clock = clock();
@@ -20,29 +21,32 @@ int main() {
 
     char *first_city = data[0].city;
     static DailyAirData city_data[MAX_CITY_DATA_SIZE];
-    int size_of_city = 0;
-    air_data_filter_by_city(data, city_data, first_city, size, &size_of_city);
-    printf("Air quality data size in city '%s': %d\n", first_city, size_of_city);
+    int max_city_size = size < MAX_CITY_DATA_SIZE ? size : MAX_CITY_DATA_SIZE;
+    int city_size = 0;
+    air_data_filter_by_city(data, city_data, first_city, max_city_size, &city_size);
+    printf("Air quality data size in city '%s': %d\n", first_city, city_size);
 
     clock_t read_file_clock = clock();
     double read_file_duration = difftime(read_file_clock, beginning_clock);
 
-    air_data_sort(city_data, size_of_city);
+    air_data_sort(city_data, city_size);
 
     clock_t sort_data_clock = clock();
     double sort_data_duration = difftime(sort_data_clock, read_file_clock);
 
-    int city_aqi_data[MAX_CITY_DATA_SIZE];
-    for (int i = 0; i < size_of_city; ++i) {
+    int days_of_unix_epoch[city_size];
+    int city_aqi_data[city_size];
+    for (int i = 0; i < city_size; ++i) {
+        days_of_unix_epoch[i] = city_data[i].days_of_unix_epoch;
         city_aqi_data[i] = city_data[i].aqi;
     }
 
-//    float ls_theta_0, ls_theta_1;
-//    least_squares_fitting(city_aqi_data, size_of_city, &ls_theta_0, &ls_theta_1);
-//    printf("least squares: theta0=%f, theta1=%f\n", ls_theta_0, ls_theta_1);
+    float ls_theta_0, ls_theta_1;
+    fit_normal_equation(days_of_unix_epoch, city_aqi_data, city_size, &ls_theta_0, &ls_theta_1);
+    printf("Normal equation: theta0=%f, theta1=%f\n", ls_theta_0, ls_theta_1);
 
     float alpha, sgd_theta_0, sgd_theta_1;
-    bgd_fitting(city_aqi_data, size_of_city, &alpha, &sgd_theta_0, &sgd_theta_1);
+    fit_batch_gradient_descent(city_aqi_data, city_size, &alpha, &sgd_theta_0, &sgd_theta_1);
 
     clock_t fitting_clock = clock();
     double fitting_duration = difftime(fitting_clock, sort_data_clock);
