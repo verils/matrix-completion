@@ -1,38 +1,63 @@
 
-float hypothesis(float theta_0, float theta_1, float x) {
-    return theta_0 + theta_1 * x;
+double hypothesis(const double theta[2], const double x) {
+    return theta[0] + theta[1] * x;
 }
 
-float square_error(float theta_0, float theta_1, float x, float y) {
-    float error = y - hypothesis(theta_0, theta_1, x);
+double square_error(double theta[2], double x, double y) {
+    double error = hypothesis(theta, x) - y;
     return error * error;
 }
 
-float mean_sum_of_squares(float theta_0, float theta_1, float x[], float y[], int size) {
-    float sum = 0;
+double mean_sum_of_squares(double theta[2], double x[], double y[], int size) {
+    double sum = 0;
     for (int i = 0; i < size; ++i) {
-        sum += square_error(theta_0, theta_1, x[i], y[i]);
+        sum += square_error(theta, x[i], y[i]);
     }
-    return sum / (float) size;
+    return sum / (double) size;
 }
 
-void fit_normal_equation(const int days[], const int data[], int size, float *theta_0, float *theta_1) {
-    float sum_x = 0, sum_y = 0, sum_xx = 0, sum_xy = 0, avg_x, avg_y, avg_xx, avg_xy;
+//L(a,b)=(1/2m)sum(1,n)(a+bx-y)^2
+//L(a,b)=(1/2m)sum(1,n)(a^2+abx-ay+abx+(b^2)(x^2)-bxy-ay-bxy+y^2)
+//L(a,b)=(1/2m)sum(1,n)(a^2+2abx-2ay+(b^2)(x^2)-2bxy+y^2)
+//
+//d/da(L(a,b))=(1/2m)sum(1,n)(2a+2bx-2y)
+//d/da(L(a,b))=(1/2m)sum(1,n) 2(a+bx-y)
+//d/da(L(a,b))=(1/2m)2 sum(1,n)(a+bx-y)
+//d/da(L(a,b))=(1/m) sum(1,n)(a+bx-y)
+//
+//d/db(L(a,b))=(1/2m)sum(1,n)(2ax+2b(x^2)-2xy)
+//d/db(L(a,b))=(1/2m)sum(1,n) (2a+2bx-2y)x
+//d/db(L(a,b))=(1/2m)sum(1,n) 2(a+bx-y)x
+//d/db(L(a,b))=(1/2m)2 sum(1,n)(a+bx-y)x
+//d/db(L(a,b))=(1/m) sum(1,n)(a+bx-y)x
+
+void fit_normal_equation(const int *x, const int *y, int size, double *theta) {
+    double sum_x = 0, sum_y = 0, sum_xx = 0, sum_xy = 0, avg_x, avg_y, avg_xx, avg_xy;
     for (int i = 0; i < size; ++i) {
-        sum_x += (float) days[i];
-        sum_y += (float) data[i];
-        sum_xy += (float) days[i] * (float) data[i];
+        sum_x += (double) x[i];
+        sum_y += (double) y[i];
+        sum_xy += (double) x[i] * (double) y[i];
     }
-    float size_f = (float) size;
+    double size_f = (double) size;
     avg_x = sum_x / size_f;
     avg_y = sum_y / size_f;
     avg_xx = sum_xx / size_f;
     avg_xy = sum_xy / size_f;
 
-    *theta_1 = (avg_xy - avg_x * avg_y) / (avg_xx - avg_x * avg_x);
-    *theta_0 = (sum_y - *theta_1 * sum_x) / size_f;
+    theta[1] = (avg_xy - avg_x * avg_y) / (avg_xx - avg_x * avg_x);
+    theta[0] = (sum_y - theta[1] * sum_x) / size_f;
 }
 
-void fit_batch_gradient_descent(const int data[], int size, float *alpha, float *theta_0, float *theta_1) {
+void fit_batch_gradient_descent(const int *x, const int *y, int size, double *alpha, double *theta, int steps) {
+    int matrix_x[size][2];
+    for (int i = 0; i < size; ++i) {
+        matrix_x[i][0] = 1;
+        matrix_x[i][1] = x[i];
+    }
 
+    for (int step = 0; step < steps; ++step) {
+        for (int i = 0; i < size; ++i) {
+            matrix_x[i][0];
+        }
+    }
 }

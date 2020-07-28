@@ -8,7 +8,7 @@
 //#define DATA_SIZE 50
 #define MAX_DATA_SIZE 560000
 //#define MAX_CITY_DATA_SIZE 1500
-#define MAX_CITY_DATA_SIZE 1200
+#define MAX_CITY_DATA_SIZE 6
 
 int main() {
     time_t beginning_clock = clock();
@@ -41,12 +41,13 @@ int main() {
         city_aqi_data[i] = city_data[i].aqi;
     }
 
-    float ls_theta_0, ls_theta_1;
-    fit_normal_equation(days_of_unix_epoch, city_aqi_data, city_size, &ls_theta_0, &ls_theta_1);
-    printf("Normal equation: theta0=%f, theta1=%f\n", ls_theta_0, ls_theta_1);
+    double ne_theta[2] = {0};
+    fit_normal_equation(days_of_unix_epoch, city_aqi_data, city_size, ne_theta);
+    printf("Normal equation: theta[0]=%f, theta[1]=%f\n", ne_theta[0], ne_theta[1]);
 
-    float alpha, sgd_theta_0, sgd_theta_1;
-    fit_batch_gradient_descent(city_aqi_data, city_size, &alpha, &sgd_theta_0, &sgd_theta_1);
+    double alpha = 0.1, bgd_theta[2] = {0};
+    fit_batch_gradient_descent(days_of_unix_epoch, city_aqi_data, city_size, &alpha, bgd_theta, 1000);
+    printf("Batch gradient descent: theta[0]=%f, theta[1]=%f\n", ne_theta[0], ne_theta[1]);
 
     clock_t fitting_clock = clock();
     double fitting_duration = difftime(fitting_clock, sort_data_clock);
