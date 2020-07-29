@@ -5,10 +5,9 @@
 
 #define FILENAME "air.csv"
 
-//#define DATA_SIZE 50
 #define MAX_DATA_SIZE 560000
 //#define MAX_CITY_DATA_SIZE 1500
-#define MAX_CITY_DATA_SIZE 12
+#define MAX_CITY_DATA_SIZE 32
 
 typedef struct {
     int current;
@@ -62,21 +61,13 @@ int main() {
     fit_normal_equation(days_of_unix_epoch, city_aqi_data, city_size, ne_theta);
     timer_record(&timer);
 
-    const int steps = 100;
-    double alpha = 0.000000003, bgd_theta[2] = {50, 0};
-    double bgd_theta_history[steps][2];
-    for (int i = 0; i < steps; ++i) {
-        bgd_theta_history[i][0] = 0;
-    }
-    fit_batch_gradient_descent(days_of_unix_epoch, city_aqi_data, city_size, &alpha, bgd_theta, steps,
-                               bgd_theta_history);
+    const int steps = 12000;
+    double alpha = 0.003, bgd_theta[2] = {0};
+    fit_batch_gradient_descent(days_of_unix_epoch, city_aqi_data, city_size, alpha, bgd_theta, steps);
     timer_record(&timer);
 
     printf("Normal equation: theta[0]=%f, theta[1]=%f\n", ne_theta[0], ne_theta[1]);
-    for (int i = 0; i < steps; ++i) {
-        printf("Batch gradient descent: step=%d, theta[0]=%f, theta[1]=%f\n", i,
-               bgd_theta_history[i][0], bgd_theta_history[i][1]);
-    }
+    printf("Batch gradient descent: theta[0]=%f, theta[1]=%f\n", bgd_theta[0], bgd_theta[1]);
 
     printf("Air data read time usage: %.2fms\n", timer_milliseconds(&timer, 0, 1));
     printf("Air data sort time usage: %.2fms\n", timer_milliseconds(&timer, 2, 3));

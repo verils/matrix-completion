@@ -7,7 +7,7 @@
 int get_day_of_unix_epoch(char *date) {
     int year, month, day;
     sscanf(date, "%d/%d/%d", &year, &month, &day);
-    struct tm time_data = {0, 0, 0, day, month - 1, year - 1900};
+    struct tm time_data = {0, 0, 0, day, month - 1, year - 1900 - 45};
     time_t seconds = mktime(&time_data);
     int days = (int) (seconds / 60 / 60 / 24);
     return days;
@@ -78,22 +78,6 @@ int air_data_compare(const void *a, const void *b) {
     }
 
     return a_data->days_of_unix_epoch - b_data->days_of_unix_epoch;
-
-
-//    int a_year, a_month, a_day, b_year, b_month, b_day;
-//    sscanf(a_data->date, "%d/%d/%d", &a_year, &a_month, &a_day);
-//    sscanf(b_data->date, "%d/%d/%d", &b_year, &b_month, &b_day);
-//
-//    if (a_year != b_year) {
-//        return a_year - b_year;
-//    }
-//    if (a_month != b_month) {
-//        return a_month - b_month;
-//    }
-//    if (a_day != b_day) {
-//        return a_day - b_day;
-//    }
-//    return 0;
 }
 
 void air_data_sort(DailyAirData data[], int size) {
