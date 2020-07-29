@@ -38,26 +38,30 @@ void fit_normal_equation(const int *x, const int *y, int size, double *theta) {
         sum_y += (double) y[i];
         sum_xy += (double) x[i] * (double) y[i];
     }
-    double size_f = (double) size;
-    avg_x = sum_x / size_f;
-    avg_y = sum_y / size_f;
-    avg_xx = sum_xx / size_f;
-    avg_xy = sum_xy / size_f;
+    double size_d = (double) size;
+    avg_x = sum_x / size_d;
+    avg_y = sum_y / size_d;
+    avg_xx = sum_xx / size_d;
+    avg_xy = sum_xy / size_d;
 
     theta[1] = (avg_xy - avg_x * avg_y) / (avg_xx - avg_x * avg_x);
-    theta[0] = (sum_y - theta[1] * sum_x) / size_f;
+    theta[0] = (sum_y - theta[1] * sum_x) / size_d;
 }
 
-void fit_batch_gradient_descent(const int *x, const int *y, int size, double *alpha, double *theta, int steps) {
-    int matrix_x[size][2];
-    for (int i = 0; i < size; ++i) {
-        matrix_x[i][0] = 1;
-        matrix_x[i][1] = x[i];
-    }
-
+void
+fit_batch_gradient_descent(const int *x, const int *y, int size, const double *alpha, double theta[2], int steps,
+                           double theta_history[steps][2]) {
     for (int step = 0; step < steps; ++step) {
+        double sum_0 = 0, sum_1 = 0;
+        double theta_0 = theta[0], theta_1 = theta[1];
         for (int i = 0; i < size; ++i) {
-            matrix_x[i][0];
+            sum_0 += theta_0 + theta_1 * x[i] - y[i];
+            sum_1 += (theta_0 + theta_1 * x[i] - y[i]) * x[i];
         }
+        double avg_0 = sum_0 / size, avg_1 = sum_1 / size;
+        theta[0] = theta_0 - *alpha * avg_0;
+        theta[1] = theta_1 - *alpha * avg_1;
+        theta_history[step][0] = theta_0;
+        theta_history[step][1] = theta_1;
     }
 }
