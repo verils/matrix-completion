@@ -58,12 +58,12 @@ int main() {
     timer_record(&timer);
 
     double ne_theta[2] = {0};
-    fit_normal_equation(days_of_unix_epoch, city_aqi_data, city_size, ne_theta);
+    fit_normal_equation(ne_theta, days_of_unix_epoch, city_aqi_data, city_size);
     timer_record(&timer);
 
-    const int steps = 12000;
+    const int steps = 15000;
     double alpha = 0.003, bgd_theta[2] = {0};
-    fit_batch_gradient_descent(days_of_unix_epoch, city_aqi_data, city_size, alpha, bgd_theta, steps);
+    fit_batch_gradient_descent(bgd_theta, alpha, steps, days_of_unix_epoch, city_aqi_data, city_size);
     timer_record(&timer);
 
     printf("Normal equation: theta[0]=%f, theta[1]=%f\n", ne_theta[0], ne_theta[1]);

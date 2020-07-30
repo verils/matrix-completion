@@ -1,4 +1,3 @@
-#include <stdio.h>
 
 double hypothesis(const double theta[2], const double x) {
     return theta[0] + theta[1] * x;
@@ -28,7 +27,7 @@ double squared_error(const double theta[2], const int x[], const int y[], const 
 //d/db(L(a,b))=(1/2m)2 sum(1,m)((a+bx-y)x)
 //d/db(L(a,b))=(1/m) sum(1,m)((a+bx-y)x)
 
-void fit_normal_equation(const int *x, const int *y, int size, double *theta) {
+void fit_normal_equation(double *theta, const int *x, const int *y, int size) {
     double sum_x = 0, sum_y = 0, sum_xx = 0, sum_xy = 0, avg_x, avg_y, avg_xx, avg_xy;
     for (int i = 0; i < size; ++i) {
         sum_x += (double) x[i];
@@ -45,8 +44,7 @@ void fit_normal_equation(const int *x, const int *y, int size, double *theta) {
     theta[0] = (sum_y - theta[1] * sum_x) / size_d;
 }
 
-void
-fit_batch_gradient_descent(const int *x, const int *y, int size, double alpha, double theta[2], int steps) {
+void fit_batch_gradient_descent(double theta[2], double alpha, int steps, const int *x, const int *y, int size) {
     for (int step = 0; step < steps; ++step) {
         double sum_0 = 0, sum_1 = 0, theta_0, theta_1;
         for (int i = 0; i < size; ++i) {
@@ -58,6 +56,5 @@ fit_batch_gradient_descent(const int *x, const int *y, int size, double alpha, d
         theta_1 = theta[1] - alpha * avg_1;
         theta[0] = theta_0;
         theta[1] = theta_1;
-        printf("squared error: %f\n", squared_error(theta, x, y, size));
     }
 }
