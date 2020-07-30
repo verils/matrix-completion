@@ -1,3 +1,4 @@
+#include <stdlib.h>
 
 double hypothesis(const double theta[2], const double x) {
     return theta[0] + theta[1] * x;
@@ -27,7 +28,7 @@ double squared_error(const double theta[2], const int x[], const int y[], const 
 //d/db(L(a,b))=(1/2m)2 sum(1,m)((a+bx-y)x)
 //d/db(L(a,b))=(1/m) sum(1,m)((a+bx-y)x)
 
-void fit_normal_equation(double *theta, const int *x, const int *y, int size) {
+void normal_equation(double *theta, const int *x, const int *y, int size) {
     double sum_x = 0, sum_y = 0, sum_xx = 0, sum_xy = 0, avg_x, avg_y, avg_xx, avg_xy;
     for (int i = 0; i < size; ++i) {
         sum_x += (double) x[i];
@@ -44,13 +45,27 @@ void fit_normal_equation(double *theta, const int *x, const int *y, int size) {
     theta[0] = (sum_y - theta[1] * sum_x) / size_d;
 }
 
-void fit_batch_gradient_descent(double theta[2], double alpha, int steps, const int *x, const int *y, int size) {
+void batch_gradient_descent(double *theta, double alpha, int steps, const int *x, const int *y, int size) {
     for (int step = 0; step < steps; ++step) {
         double sum_0 = 0, sum_1 = 0, theta_0, theta_1;
         for (int i = 0; i < size; ++i) {
             sum_0 += theta[0] + theta[1] * x[i] - y[i];
             sum_1 += (theta[0] + theta[1] * x[i] - y[i]) * x[i];
         }
+        double avg_0 = sum_0 / size, avg_1 = sum_1 / size;
+        theta_0 = theta[0] - alpha * avg_0;
+        theta_1 = theta[1] - alpha * avg_1;
+        theta[0] = theta_0;
+        theta[1] = theta_1;
+    }
+}
+
+void stochastic_gradient_descent(double theta[2], double alpha, int steps, const int *x, const int *y, int size) {
+    for (int step = 0; step < steps; ++step) {
+        double sum_0 = 0, sum_1 = 0, theta_0, theta_1;
+        int index = rand() % size;
+        sum_0 += theta[0] + theta[1] * x[index] - y[index];
+        sum_1 += (theta[0] + theta[1] * x[index] - y[index]) * x[index];
         double avg_0 = sum_0 / size, avg_1 = sum_1 / size;
         theta_0 = theta[0] - alpha * avg_0;
         theta_1 = theta[1] - alpha * avg_1;

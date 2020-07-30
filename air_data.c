@@ -13,7 +13,7 @@ int get_day_of_unix_epoch(char *date) {
     return days;
 }
 
-void air_data_read_csv(DailyAirData data[], int max_size, int *size, char *filename) {
+int air_data_read_csv(char *filename, DailyAirData data[], int max_size) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         printf("Error opening file %s", filename);
@@ -52,12 +52,13 @@ void air_data_read_csv(DailyAirData data[], int max_size, int *size, char *filen
         }
         ++lines;
     }
-    *size = lines;
 
     fclose(file);
+
+    return lines;
 }
 
-void air_data_filter_by_city(DailyAirData source[], DailyAirData target[], char *city, int max_size, int *size) {
+int air_data_copy_for_city(DailyAirData *source, DailyAirData *target, char *city, int max_size) {
     int count = 0;
     for (int i = 0; i < max_size; ++i) {
         DailyAirData data = source[i];
@@ -66,7 +67,7 @@ void air_data_filter_by_city(DailyAirData source[], DailyAirData target[], char 
             target[count++] = data;
         }
     }
-    *size = count;
+    return count;
 }
 
 int air_data_compare(const void *a, const void *b) {

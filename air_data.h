@@ -10,9 +10,9 @@ struct DailyAirData {
 
 typedef struct DailyAirData DailyAirData;
 
-void air_data_read_csv(DailyAirData data[], int max_size, int *size, char *filename);
+int air_data_read_csv(char *filename, DailyAirData data[], int max_size);
 
-void air_data_filter_by_city(DailyAirData source[], DailyAirData target[], char *city, int max_size, int *size);
+int air_data_copy_for_city(DailyAirData *source, DailyAirData *target, char *city, int max_size);
 
 void air_data_sort(DailyAirData data[], int size);
 
