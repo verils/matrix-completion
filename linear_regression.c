@@ -14,6 +14,10 @@ double squared_error(const double theta[2], const int x[], const int y[], const 
     return sum / 2 / size;
 }
 
+void simulated_annealing() {
+
+}
+
 //L(a,b)=(1/2m)sum(1,m)(a+bx-y)^2
 //L(a,b)=(1/2m)sum(1,m)(a^2+abx-ay+abx+(b^2)(x^2)-bxy-ay-bxy+y^2)
 //L(a,b)=(1/2m)sum(1,m)(a^2+2abx-2ay+(b^2)(x^2)-2bxy+y^2)
@@ -84,7 +88,7 @@ mini_batch_gradient_descent(double *theta, double alpha, int steps, int batch_si
             sum_0 += theta[0] + theta[1] * x[index] - y[index];
             sum_1 += (theta[0] + theta[1] * x[index] - y[index]) * x[index];
         }
-        double avg_0 = sum_0 / size, avg_1 = sum_1 / size;
+        double avg_0 = sum_0 / batch_size, avg_1 = sum_1 / batch_size;
         theta_0 = theta[0] - alpha * avg_0;
         theta_1 = theta[1] - alpha * avg_1;
         theta[0] = theta_0;

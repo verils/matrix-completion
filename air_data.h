@@ -1,14 +1,12 @@
 
-struct DailyAirData {
+typedef struct {
     char *date;
     int days_of_unix_epoch;
     char *city;
     int aqi;
     int pm25;
     int pm10;
-};
-
-typedef struct DailyAirData DailyAirData;
+} DailyAirData;
 
 int air_data_read_csv(char *filename, DailyAirData data[], int max_size);
 
