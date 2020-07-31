@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 
 double hypothesis(const double theta[2], const double x) {
     return theta[0] + theta[1] * x;
@@ -61,11 +62,28 @@ void batch_gradient_descent(double *theta, double alpha, int steps, const int *x
 }
 
 void stochastic_gradient_descent(double theta[2], double alpha, int steps, const int *x, const int *y, int size) {
+    srand(time(NULL));
+    for (int step = 0; step < steps; ++step) {
+        double theta_0, theta_1;
+        int index = rand() % size;
+        theta_0 = theta[0] - alpha * (theta[0] + theta[1] * x[index] - y[index]);
+        theta_1 = theta[1] - alpha * ((theta[0] + theta[1] * x[index] - y[index]) * x[index]);
+        theta[0] = theta_0;
+        theta[1] = theta_1;
+    }
+}
+
+void
+mini_batch_gradient_descent(double *theta, double alpha, int steps, int batch_size, const int *x, const int *y,
+                            int size) {
+    srand(time(NULL));
     for (int step = 0; step < steps; ++step) {
         double sum_0 = 0, sum_1 = 0, theta_0, theta_1;
-        int index = rand() % size;
-        sum_0 += theta[0] + theta[1] * x[index] - y[index];
-        sum_1 += (theta[0] + theta[1] * x[index] - y[index]) * x[index];
+        for (int i = 0; i < batch_size; ++i) {
+            int index = rand() % size;
+            sum_0 += theta[0] + theta[1] * x[index] - y[index];
+            sum_1 += (theta[0] + theta[1] * x[index] - y[index]) * x[index];
+        }
         double avg_0 = sum_0 / size, avg_1 = sum_1 / size;
         theta_0 = theta[0] - alpha * avg_0;
         theta_1 = theta[1] - alpha * avg_1;
@@ -73,3 +91,4 @@ void stochastic_gradient_descent(double theta[2], double alpha, int steps, const
         theta[1] = theta_1;
     }
 }
+
