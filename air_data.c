@@ -4,7 +4,7 @@
 #include <time.h>
 #include "air_data.h"
 
-int get_day_of_unix_epoch(char *date) {
+int get_day_of_20150101(char *date) {
     int year, month, day;
     sscanf(date, "%d/%d/%d", &year, &month, &day);
     struct tm time_data = {0, 0, 0, day, month - 1, year - 1900 - 45};
@@ -37,7 +37,7 @@ int air_data_read_csv(char *filename, DailyAirData data[], int max_size) {
             } else if (curr_col == 0) {
                 char *date = strdup(tok);
                 data[lines].date = date;
-                data[lines].days_of_unix_epoch = get_day_of_unix_epoch(date);
+                data[lines].get_day_of_20150101 = get_day_of_20150101(date);
             } else if (curr_col == 1) {
                 data[lines].city = strdup(tok);
             } else if (curr_col == 2) {
@@ -78,7 +78,7 @@ int air_data_compare(const void *a, const void *b) {
         return cmp;
     }
 
-    return a_data->days_of_unix_epoch - b_data->days_of_unix_epoch;
+    return a_data->get_day_of_20150101 - b_data->get_day_of_20150101;
 }
 
 void air_data_sort(DailyAirData data[], int size) {

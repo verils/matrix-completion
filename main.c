@@ -55,15 +55,15 @@ int main() {
 
     timer_record(&timer);
 
-    double days_of_unix_epoch[city_data_size];
+    double days_of_20150101[city_data_size];
     double city_aqi_data[city_data_size];
     for (int i = 0; i < city_data_size; ++i) {
-        days_of_unix_epoch[i] = first_city_air_data[i].days_of_unix_epoch;
+        days_of_20150101[i] = first_city_air_data[i].get_day_of_20150101;
         city_aqi_data[i] = first_city_air_data[i].aqi;
     }
 
     DataSet data_set = {
-            .x=days_of_unix_epoch,
+            .x=days_of_20150101,
             .y=city_aqi_data,
             .size=city_data_size
     };
@@ -71,25 +71,25 @@ int main() {
     timer_record(&timer);
 
     double ne_theta[2] = {0};
-    normal_equation(ne_theta, &data_set);
+    normal_equation(&data_set, ne_theta);
 
     timer_record(&timer);
 
-    double bgd_theta[2] = {0}, bgd_alpha = 0.003;
+    double bgd_theta[2] = {0}, bgd_alpha = .003;
     const int bgd_steps = 25000;
-    batch_gradient_descent(bgd_theta, bgd_alpha, bgd_steps, &data_set);
+    batch_gradient_descent(&data_set, bgd_theta, bgd_alpha, bgd_steps);
 
     timer_record(&timer);
 
-    double sgd_theta[2] = {0}, sgd_alpha = 0.001;
+    double sgd_theta[2] = {0}, sgd_alpha = .001;
     const int sgd_steps = 250000;
-    stochastic_gradient_descent(sgd_theta, sgd_alpha, sgd_steps, &data_set);
+    stochastic_gradient_descent(&data_set, sgd_theta, sgd_alpha, sgd_steps);
 
     timer_record(&timer);
 
-    double mbgd_theta[2] = {0}, mbgd_alpha = 0.001;
+    double mbgd_theta[2] = {0}, mbgd_alpha = .001;
     const int mbgd_steps = 25000, mbgd_batch_size = 8;
-    mini_batch_gradient_descent(mbgd_theta, mbgd_alpha, mbgd_steps, mbgd_batch_size, &data_set);
+    mini_batch_gradient_descent(&data_set, mbgd_theta, mbgd_alpha, mbgd_steps, mbgd_batch_size);
 
     timer_record(&timer);
 

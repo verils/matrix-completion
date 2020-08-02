@@ -2,17 +2,20 @@
 #include <time.h>
 #include "linear_regression.h"
 
-double hypothesis(const double theta[2], const double x) {
+double hypothesis(const double *theta, const double x) {
     return theta[0] + theta[1] * x;
 }
 
-double squared_error(const double theta[2], const DataSet *data_set) {
+double squared_error(const double *theta, const DataSet *data_set) {
+    double *x = data_set->x;
+    double *y = data_set->y;
+    int size = data_set->size;
     double sum = 0;
-    for (int i = 0; i < data_set->size; ++i) {
-        double error = hypothesis(theta, data_set->x[i]) - data_set->y[i];
+    for (int i = 0; i < size; ++i) {
+        double error = hypothesis(theta, x[i]) - y[i];
         sum += error * error;
     }
-    return sum / 2 / data_set->size;
+    return sum / 2 / size;
 }
 
 double squared_error_derivative_theta_0(const double theta[2], const double x, const double y) {
@@ -42,7 +45,7 @@ void simulated_annealing() {
 //d/db(L(a,b))=(1/2m)2 sum(1,m)((a+bx-y)x)
 //d/db(L(a,b))=(1/m) sum(1,m)((a+bx-y)x)
 
-void normal_equation(double *theta, const DataSet *data_set) {
+void normal_equation(const DataSet *data_set, double *theta) {
     double sum_x = 0, sum_y = 0, sum_xx = 0, sum_xy = 0, avg_x, avg_y, avg_xx, avg_xy;
     for (int i = 0; i < data_set->size; ++i) {
         double x_d = (double) data_set->x[i];
@@ -61,7 +64,7 @@ void normal_equation(double *theta, const DataSet *data_set) {
     theta[0] = (sum_y - theta[1] * sum_x) / size_d;
 }
 
-void batch_gradient_descent(double *theta, double alpha, int steps, const DataSet *data_set) {
+void batch_gradient_descent(const DataSet *data_set, double *theta, double alpha, int steps) {
     for (int step = 0; step < steps; ++step) {
         double sum_d_theta_0 = 0, sum_d_theta_1 = 0, theta_0, theta_1;
         for (int i = 0; i < data_set->size; ++i) {
@@ -76,7 +79,7 @@ void batch_gradient_descent(double *theta, double alpha, int steps, const DataSe
     }
 }
 
-void stochastic_gradient_descent(double theta[2], double alpha, int steps, const DataSet *data_set) {
+void stochastic_gradient_descent(const DataSet *data_set, double *theta, double alpha, int steps) {
     srand(time(NULL));
     for (int step = 0; step < steps; ++step) {
         int index = rand() % data_set->size;
@@ -89,8 +92,7 @@ void stochastic_gradient_descent(double theta[2], double alpha, int steps, const
     }
 }
 
-void
-mini_batch_gradient_descent(double *theta, double alpha, int steps, int batch_size, const DataSet *data_set) {
+void mini_batch_gradient_descent(const DataSet *data_set, double *theta, double alpha, int steps, int batch_size) {
     srand(time(NULL));
     for (int step = 0; step < steps; ++step) {
         double sum_0 = 0, sum_1 = 0, theta_0, theta_1;
