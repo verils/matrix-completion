@@ -8,7 +8,7 @@
 //#define MAX_DATA_SIZE 560000
 #define MAX_DATA_SET_SIZE 4000
 //#define MAX_CITY_DATA_SIZE 1500
-#define MAX_CITY_DATA_SET_SIZE 32
+#define MAX_CITY_DATA_SET_SIZE 256
 
 typedef struct {
     int current;
@@ -89,23 +89,23 @@ int main() {
 
     timer_record(&timer);
 
-    double bgd_theta[2], bgd_alpha = .01;
+    double bgd_theta[2], bgd_alpha = .13333333;
     copy_array(initial_theta, bgd_theta, 2);
-    const int bgd_steps = 100000;
+    const int bgd_steps = 2000000;
     batch_gradient_descent(&data_set, bgd_theta, bgd_alpha, bgd_steps);
 
     timer_record(&timer);
 
-    double sgd_theta[2], sgd_alpha = .001;
+    double sgd_theta[2], sgd_alpha = .13333333;
     copy_array(initial_theta, sgd_theta, 2);
-    const int sgd_steps = 250000;
+    const int sgd_steps = 2000000;
     stochastic_gradient_descent(&data_set, sgd_theta, sgd_alpha, sgd_steps);
 
     timer_record(&timer);
 
-    double mbgd_theta[2], mbgd_alpha = .001;
+    double mbgd_theta[2], mbgd_alpha = .13333333;
     copy_array(initial_theta, mbgd_theta, 2);
-    const int mbgd_steps = 250000, mbgd_batch_size = 8;
+    const int mbgd_steps = 2000000, mbgd_batch_size = 16;
     mini_batch_gradient_descent(&data_set, mbgd_theta, mbgd_alpha, mbgd_steps, mbgd_batch_size);
 
     timer_record(&timer);
