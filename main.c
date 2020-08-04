@@ -47,8 +47,6 @@ int main() {
     data_size = air_data_read_csv(FILENAME, air_data, MAX_DATA_SET_SIZE);
     printf("Air quality data set size: %d, memory: %luKB\n", data_size, data_size * sizeof(DailyAirData) / 1024);
 
-    timer_record(&timer);
-
     char *first_city = air_data[0].city;
     int max_city_size = data_size < MAX_CITY_DATA_SET_SIZE ? data_size : MAX_CITY_DATA_SET_SIZE;
 
@@ -91,21 +89,21 @@ int main() {
 
     double bgd_theta[2], bgd_alpha = .13333333;
     copy_array(initial_theta, bgd_theta, 2);
-    const int bgd_steps = 2000000;
+    const int bgd_steps = 1000000;
     batch_gradient_descent(&data_set, bgd_theta, bgd_alpha, bgd_steps);
 
     timer_record(&timer);
 
     double sgd_theta[2], sgd_alpha = .13333333;
     copy_array(initial_theta, sgd_theta, 2);
-    const int sgd_steps = 2000000;
+    const int sgd_steps = 1000000;
     stochastic_gradient_descent(&data_set, sgd_theta, sgd_alpha, sgd_steps);
 
     timer_record(&timer);
 
     double mbgd_theta[2], mbgd_alpha = .13333333;
     copy_array(initial_theta, mbgd_theta, 2);
-    const int mbgd_steps = 2000000, mbgd_batch_size = 16;
+    const int mbgd_steps = 1000000, mbgd_batch_size = 16;
     mini_batch_gradient_descent(&data_set, mbgd_theta, mbgd_alpha, mbgd_steps, mbgd_batch_size);
 
     timer_record(&timer);
@@ -120,12 +118,12 @@ int main() {
            mbgd_theta[0], mbgd_theta[1], squares_error(mbgd_theta, &data_set));
 
     printf("Air data read time usage: %.2fms\n", timer_milliseconds(&timer, 0, 1));
-    printf("Air data sort time usage: %.2fms\n", timer_milliseconds(&timer, 2, 3));
-    printf("Air data normal equation fitting usage: %.2fms\n", timer_milliseconds(&timer, 4, 5));
-    printf("Air data batch gradient descent fitting usage: %.2fms\n", timer_milliseconds(&timer, 5, 6));
-    printf("Air data stochastic gradient descent fitting usage: %.2fms\n", timer_milliseconds(&timer, 6, 7));
-    printf("Air data mini batch gradient descent fitting usage: %.2fms\n", timer_milliseconds(&timer, 7, 8));
-    printf("total usage: %.2fms\n", timer_milliseconds(&timer, 0, 8));
+    printf("Air data sort time usage: %.2fms\n", timer_milliseconds(&timer, 1, 2));
+    printf("Air data normal equation fitting usage: %.2fms\n", timer_milliseconds(&timer, 3, 4));
+    printf("Air data batch gradient descent fitting usage: %.2fms\n", timer_milliseconds(&timer, 4, 5));
+    printf("Air data stochastic gradient descent fitting usage: %.2fms\n", timer_milliseconds(&timer, 5, 6));
+    printf("Air data mini batch gradient descent fitting usage: %.2fms\n", timer_milliseconds(&timer, 6, 7));
+    printf("total usage: %.2fms\n", timer_milliseconds(&timer, 0, 7));
 
     return 0;
 }
