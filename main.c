@@ -29,6 +29,12 @@ double timer_milliseconds(Timer *timer, int start, int end) {
     return (double) (timer->clocks[end] - timer->clocks[start]) * 1000 / CLOCKS_PER_SEC;
 }
 
+void copy_array(const double source[], double target[], int size) {
+    for (int i = 0; i < size; ++i) {
+        target[i] = source[i];
+    }
+}
+
 int main() {
     Timer timer = {.current = 0};
     timer_record(&timer);
@@ -39,7 +45,7 @@ int main() {
     int city_data_size;
 
     data_size = air_data_read_csv(FILENAME, air_data, MAX_DATA_SET_SIZE);
-    printf("Air quality data set size: %d, memory: %lldKB\n", data_size, data_size * sizeof(DailyAirData) / 1024);
+    printf("Air quality data set size: %d, memory: %luKB\n", data_size, data_size * sizeof(DailyAirData) / 1024);
 
     timer_record(&timer);
 
@@ -55,48 +61,63 @@ int main() {
 
     timer_record(&timer);
 
-    double days_of_20150101[city_data_size];
-    double city_aqi_data[city_data_size];
+    double features[city_data_size], results[city_data_size], sum_feature = 0, sum_result = 0;
     for (int i = 0; i < city_data_size; ++i) {
-        days_of_20150101[i] = first_city_air_data[i].get_day_of_20150101;
-        city_aqi_data[i] = first_city_air_data[i].aqi;
+        double feature = (double) first_city_air_data[i].day_of_unix_epoch / 5000;
+        double result = (double) first_city_air_data[i].aqi / 30;
+        features[i] = feature;
+        results[i] = result;
+        sum_feature += feature;
+        sum_result += result;
     }
 
+    double estimate_scale = sum_result / sum_feature;
+
     DataSet data_set = {
-            .feature=days_of_20150101,
-            .result=city_aqi_data,
+            .features=features,
+            .results=results,
             .size=city_data_size
     };
 
     timer_record(&timer);
 
-    double ne_theta[2] = {0};
+    double initial_theta[2] = {0, 0};
+
+    double ne_theta[2];
+    copy_array(initial_theta, ne_theta, 2);
     normal_equation(&data_set, ne_theta);
 
     timer_record(&timer);
 
-    double bgd_theta[2] = {0}, bgd_alpha = .003;
-    const int bgd_steps = 25000;
+    double bgd_theta[2], bgd_alpha = .01;
+    copy_array(initial_theta, bgd_theta, 2);
+    const int bgd_steps = 100000;
     batch_gradient_descent(&data_set, bgd_theta, bgd_alpha, bgd_steps);
 
     timer_record(&timer);
 
-    double sgd_theta[2] = {0}, sgd_alpha = .001;
+    double sgd_theta[2], sgd_alpha = .001;
+    copy_array(initial_theta, sgd_theta, 2);
     const int sgd_steps = 250000;
     stochastic_gradient_descent(&data_set, sgd_theta, sgd_alpha, sgd_steps);
 
     timer_record(&timer);
 
-    double mbgd_theta[2] = {0}, mbgd_alpha = .001;
-    const int mbgd_steps = 25000, mbgd_batch_size = 8;
+    double mbgd_theta[2], mbgd_alpha = .001;
+    copy_array(initial_theta, mbgd_theta, 2);
+    const int mbgd_steps = 250000, mbgd_batch_size = 8;
     mini_batch_gradient_descent(&data_set, mbgd_theta, mbgd_alpha, mbgd_steps, mbgd_batch_size);
 
     timer_record(&timer);
 
-    printf("Normal equation: theta[0]=%f, theta[1]=%f\n", ne_theta[0], ne_theta[1]);
-    printf("Batch gradient descent: theta[0]=%f, theta[1]=%f\n", bgd_theta[0], bgd_theta[1]);
-    printf("Stochastic gradient descent: theta[0]=%f, theta[1]=%f\n", sgd_theta[0], sgd_theta[1]);
-    printf("Mini batch gradient descent: theta[0]=%f, theta[1]=%f\n", mbgd_theta[0], mbgd_theta[1]);
+    printf("Normal equation: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
+           ne_theta[0], ne_theta[1], squares_error(ne_theta, &data_set));
+    printf("Batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
+           bgd_theta[0], bgd_theta[1], squares_error(bgd_theta, &data_set));
+    printf("Stochastic gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
+           sgd_theta[0], sgd_theta[1], squares_error(sgd_theta, &data_set));
+    printf("Mini batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
+           mbgd_theta[0], mbgd_theta[1], squares_error(mbgd_theta, &data_set));
 
     printf("Air data read time usage: %.2fms\n", timer_milliseconds(&timer, 0, 1));
     printf("Air data sort time usage: %.2fms\n", timer_milliseconds(&timer, 2, 3));

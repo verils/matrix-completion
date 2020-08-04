@@ -4,10 +4,10 @@
 #include <time.h>
 #include "air_data.h"
 
-int get_day_of_20150101(char *date) {
+int get_day_of_unix_epoch(char *date) {
     int year, month, day;
     sscanf(date, "%d/%d/%d", &year, &month, &day);
-    struct tm time_data = {0, 0, 0, day, month - 1, year - 1900 - 45};
+    struct tm time_data = {0, 0, 0, day, month - 1, year - 1900};
     time_t seconds = mktime(&time_data);
     int days = (int) (seconds / 60 / 60 / 24);
     return days;
@@ -37,7 +37,7 @@ int air_data_read_csv(char *filename, DailyAirData data[], int max_size) {
             } else if (curr_col == 0) {
                 char *date = strdup(tok);
                 data[lines].date = date;
-                data[lines].get_day_of_20150101 = get_day_of_20150101(date);
+                data[lines].day_of_unix_epoch = get_day_of_unix_epoch(date);
             } else if (curr_col == 1) {
                 data[lines].city = strdup(tok);
             } else if (curr_col == 2) {
@@ -78,7 +78,7 @@ int air_data_compare(const void *a, const void *b) {
         return cmp;
     }
 
-    return a_data->get_day_of_20150101 - b_data->get_day_of_20150101;
+    return a_data->day_of_unix_epoch - b_data->day_of_unix_epoch;
 }
 
 void air_data_sort(DailyAirData data[], int size) {
@@ -87,8 +87,9 @@ void air_data_sort(DailyAirData data[], int size) {
 
 void print_air_data(DailyAirData data[], int size) {
     for (int i = 0; i < size; ++i) {
-        printf("%s, %s, %d, %d, %d\n",
+        printf("%s, %d, %s, %d, %d, %d\n",
                data[i].date,
+               data[i].day_of_unix_epoch,
                data[i].city,
                data[i].aqi,
                data[i].pm25,

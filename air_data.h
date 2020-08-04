@@ -1,7 +1,7 @@
 
 typedef struct {
     char *date;
-    int get_day_of_20150101;
+    int day_of_unix_epoch;
     char *city;
     int aqi;
     int pm25;

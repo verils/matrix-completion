@@ -1,9 +1,11 @@
 
 typedef struct {
-    double *feature;
-    double *result;
+    double *features;
+    double *results;
     int size;
 } DataSet;
+
+double squares_error(const double *theta, const DataSet *data_set);
 
 void normal_equation(const DataSet *data_set, double *theta);
 
