@@ -7,8 +7,8 @@ double hypothesis(const double *theta, const double x) {
 }
 
 double squared_error(const double *theta, const DataSet *data_set) {
-    double *x = data_set->x;
-    double *y = data_set->y;
+    double *x = data_set->feature;
+    double *y = data_set->result;
     int size = data_set->size;
     double sum = 0;
     for (int i = 0; i < size; ++i) {
@@ -48,8 +48,8 @@ void simulated_annealing() {
 void normal_equation(const DataSet *data_set, double *theta) {
     double sum_x = 0, sum_y = 0, sum_xx = 0, sum_xy = 0, avg_x, avg_y, avg_xx, avg_xy;
     for (int i = 0; i < data_set->size; ++i) {
-        double x_d = (double) data_set->x[i];
-        double y_d = (double) data_set->y[i];
+        double x_d = (double) data_set->feature[i];
+        double y_d = (double) data_set->result[i];
         sum_x += x_d;
         sum_y += y_d;
         sum_xx += x_d * x_d;
@@ -68,8 +68,8 @@ void batch_gradient_descent(const DataSet *data_set, double *theta, double alpha
     for (int step = 0; step < steps; ++step) {
         double sum_d_theta_0 = 0, sum_d_theta_1 = 0, theta_0, theta_1;
         for (int i = 0; i < data_set->size; ++i) {
-            sum_d_theta_0 += squared_error_derivative_theta_0(theta, data_set->x[i], data_set->y[i]);
-            sum_d_theta_1 += squared_error_derivative_theta_1(theta, data_set->x[i], data_set->y[i]);
+            sum_d_theta_0 += squared_error_derivative_theta_0(theta, data_set->feature[i], data_set->result[i]);
+            sum_d_theta_1 += squared_error_derivative_theta_1(theta, data_set->feature[i], data_set->result[i]);
         }
         double avg_0 = sum_d_theta_0 / data_set->size, avg_1 = sum_d_theta_1 / data_set->size;
         theta_0 = theta[0] - alpha * avg_0;
@@ -83,8 +83,8 @@ void stochastic_gradient_descent(const DataSet *data_set, double *theta, double 
     srand(time(NULL));
     for (int step = 0; step < steps; ++step) {
         int index = rand() % data_set->size;
-        double d_theta_0 = squared_error_derivative_theta_0(theta, data_set->x[index], data_set->y[index]);
-        double d_theta_1 = squared_error_derivative_theta_1(theta, data_set->x[index], data_set->y[index]);
+        double d_theta_0 = squared_error_derivative_theta_0(theta, data_set->feature[index], data_set->result[index]);
+        double d_theta_1 = squared_error_derivative_theta_1(theta, data_set->feature[index], data_set->result[index]);
         double theta_0 = theta[0] - alpha * d_theta_0;
         double theta_1 = theta[1] - alpha * d_theta_1;
         theta[0] = theta_0;
@@ -98,8 +98,8 @@ void mini_batch_gradient_descent(const DataSet *data_set, double *theta, double 
         double sum_0 = 0, sum_1 = 0, theta_0, theta_1;
         for (int i = 0; i < batch_size; ++i) {
             int index = rand() % data_set->size;
-            sum_0 += squared_error_derivative_theta_0(theta, data_set->x[index], data_set->y[index]);
-            sum_1 += squared_error_derivative_theta_1(theta, data_set->x[index], data_set->y[index]);
+            sum_0 += squared_error_derivative_theta_0(theta, data_set->feature[index], data_set->result[index]);
+            sum_1 += squared_error_derivative_theta_1(theta, data_set->feature[index], data_set->result[index]);
         }
         double avg_0 = sum_0 / batch_size, avg_1 = sum_1 / batch_size;
         theta_0 = theta[0] - alpha * avg_0;

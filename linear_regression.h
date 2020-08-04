@@ -1,7 +1,7 @@
 
 typedef struct {
-    double *x;
-    double *y;
+    double *feature;
+    double *result;
     int size;
 } DataSet;
 

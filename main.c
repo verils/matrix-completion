@@ -63,8 +63,8 @@ int main() {
     }
 
     DataSet data_set = {
-            .x=days_of_20150101,
-            .y=city_aqi_data,
+            .feature=days_of_20150101,
+            .result=city_aqi_data,
             .size=city_data_size
     };
 
