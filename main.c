@@ -15,8 +15,9 @@ typedef struct {
     clock_t clocks[16];
 } Timer;
 
-void timer_record(Timer *timer) {
-    timer->clocks[timer->current++] = clock();
+int timer_record(Timer *timer) {
+    timer->clocks[timer->current] = clock();
+    return timer->current++;
 }
 
 double timer_milliseconds(Timer *timer, int start, int end) {
@@ -37,7 +38,7 @@ void copy_array(const double source[], double target[], int size) {
 
 int main() {
     Timer timer = {.current = 0};
-    timer_record(&timer);
+    int timer_start = timer_record(&timer);
 
     static DailyAirData air_data[MAX_DATA_SET_SIZE] = {NULL};
     static DailyAirData first_city_air_data[MAX_CITY_DATA_SET_SIZE] = {NULL};
@@ -53,23 +54,19 @@ int main() {
     city_data_size = air_data_copy_for_city(air_data, first_city_air_data, first_city, max_city_size);
     printf("Air quality data set size in city '%s': %d\n", first_city, city_data_size);
 
-    timer_record(&timer);
+    int timer_file_read = timer_record(&timer);
 
     air_data_sort(first_city_air_data, city_data_size);
 
-    timer_record(&timer);
+    int timer_data_sorted = timer_record(&timer);
 
-    double features[city_data_size], results[city_data_size], sum_feature = 0, sum_result = 0;
+    double features[city_data_size], results[city_data_size];
+    int days_of_unix_epoch_scale = 5000;
+    int aqi_scale = 30;
     for (int i = 0; i < city_data_size; ++i) {
-        double feature = (double) first_city_air_data[i].day_of_unix_epoch / 5000;
-        double result = (double) first_city_air_data[i].aqi / 30;
-        features[i] = feature;
-        results[i] = result;
-        sum_feature += feature;
-        sum_result += result;
+        features[i] = (double) first_city_air_data[i].day_of_unix_epoch / days_of_unix_epoch_scale;
+        results[i] = (double) first_city_air_data[i].aqi / aqi_scale;
     }
-
-    double estimate_scale = sum_result / sum_feature;
 
     DataSet data_set = {
             .features=features,
@@ -77,53 +74,59 @@ int main() {
             .size=city_data_size
     };
 
-    timer_record(&timer);
+    int timer_data_prepared = timer_record(&timer);
 
     double initial_theta[2] = {0, 0};
 
     double ne_theta[2];
     copy_array(initial_theta, ne_theta, 2);
     normal_equation(&data_set, ne_theta);
+    printf("Normal equation: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
+           ne_theta[0], ne_theta[1], squares_error(ne_theta, &data_set));
 
-    timer_record(&timer);
+    int timer_ne = timer_record(&timer);
 
     double bgd_theta[2], bgd_alpha = .13333333;
     copy_array(initial_theta, bgd_theta, 2);
-    const int bgd_steps = 1000000;
+    const int bgd_steps = 400000;
     batch_gradient_descent(&data_set, bgd_theta, bgd_alpha, bgd_steps);
+    printf("Batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
+           bgd_theta[0], bgd_theta[1], squares_error(bgd_theta, &data_set));
 
-    timer_record(&timer);
+    int timer_bgd = timer_record(&timer);
 
     double sgd_theta[2], sgd_alpha = .13333333;
     copy_array(initial_theta, sgd_theta, 2);
-    const int sgd_steps = 1000000;
+    const int sgd_steps = 400000;
     stochastic_gradient_descent(&data_set, sgd_theta, sgd_alpha, sgd_steps);
+    printf("Stochastic gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
+           sgd_theta[0], sgd_theta[1], squares_error(sgd_theta, &data_set));
 
-    timer_record(&timer);
+    int timer_sgd = timer_record(&timer);
 
     double mbgd_theta[2], mbgd_alpha = .13333333;
     copy_array(initial_theta, mbgd_theta, 2);
-    const int mbgd_steps = 1000000, mbgd_batch_size = 16;
+    const int mbgd_steps = 400000, mbgd_batch_size = 8;
     mini_batch_gradient_descent(&data_set, mbgd_theta, mbgd_alpha, mbgd_steps, mbgd_batch_size);
-
-    timer_record(&timer);
-
-    printf("Normal equation: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
-           ne_theta[0], ne_theta[1], squares_error(ne_theta, &data_set));
-    printf("Batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
-           bgd_theta[0], bgd_theta[1], squares_error(bgd_theta, &data_set));
-    printf("Stochastic gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
-           sgd_theta[0], sgd_theta[1], squares_error(sgd_theta, &data_set));
     printf("Mini batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
            mbgd_theta[0], mbgd_theta[1], squares_error(mbgd_theta, &data_set));
 
-    printf("Air data read time usage: %.2fms\n", timer_milliseconds(&timer, 0, 1));
-    printf("Air data sort time usage: %.2fms\n", timer_milliseconds(&timer, 1, 2));
-    printf("Air data normal equation fitting usage: %.2fms\n", timer_milliseconds(&timer, 3, 4));
-    printf("Air data batch gradient descent fitting usage: %.2fms\n", timer_milliseconds(&timer, 4, 5));
-    printf("Air data stochastic gradient descent fitting usage: %.2fms\n", timer_milliseconds(&timer, 5, 6));
-    printf("Air data mini batch gradient descent fitting usage: %.2fms\n", timer_milliseconds(&timer, 6, 7));
-    printf("total usage: %.2fms\n", timer_milliseconds(&timer, 0, 7));
+    int timer_mbgd = timer_record(&timer);
+
+    printf("Air data read time usage: %.3fms\n",
+           timer_milliseconds(&timer, timer_start, timer_file_read));
+    printf("Air data sort time usage: %.3fms\n",
+           timer_milliseconds(&timer, timer_file_read, timer_data_sorted));
+    printf("Air data normal equation fitting usage: %.3fms\n",
+           timer_milliseconds(&timer, timer_data_prepared, timer_ne));
+    printf("Air data batch gradient descent fitting usage: %.3fms\n",
+           timer_milliseconds(&timer, timer_ne, timer_bgd));
+    printf("Air data stochastic gradient descent fitting usage: %.3fms\n",
+           timer_milliseconds(&timer, timer_bgd, timer_sgd));
+    printf("Air data mini batch gradient descent fitting usage: %.3fms\n",
+           timer_milliseconds(&timer, timer_sgd, timer_mbgd));
+    printf("total usage: %.2fms\n",
+           timer_milliseconds(&timer, timer_start, timer_mbgd));
 
     return 0;
 }
