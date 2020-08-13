@@ -32,18 +32,18 @@ typedef struct {
 
 double squares_error(const double *theta, const DataSet *data_set);
 
-void train_normal_equation(double *theta, const DataSet *data_set);
+void normal_equation_train(double *theta, const DataSet *data_set);
 
-double predict_normal_equation(double *theta, double feature);
+double normal_equation_predict(double *theta, double feature);
 
-void train_batch_gradient_descent(BatchGradientDescent *bgd, const DataSet *data_set);
+void batch_gradient_descent_train(BatchGradientDescent *bgd, const DataSet *data_set);
 
-double predict_batch_gradient_descent(BatchGradientDescent *bgd, double feature);
+double batch_gradient_descent_predict(BatchGradientDescent *bgd, double feature);
 
-void train_stochastic_gradient_descent(StochasticGradientDescent *sgd, const DataSet *data_set);
+void stochastic_gradient_descent_train(StochasticGradientDescent *sgd, const DataSet *data_set);
 
-double predict_stochastic_gradient_descent(StochasticGradientDescent *sgd, double feature);
+double stochastic_gradient_descent_predict(StochasticGradientDescent *sgd, double feature);
 
-void train_mini_batch_gradient_descent(MiniBatchGradientDescent *mbgd, const DataSet *data_set);
+void mini_batch_gradient_descent_train(MiniBatchGradientDescent *mbgd, const DataSet *data_set);
 
-double predict_mini_batch_gradient_descent(MiniBatchGradientDescent *mbgd, double feature);
+double mini_batch_gradient_descent_predict(MiniBatchGradientDescent *mbgd, double feature);

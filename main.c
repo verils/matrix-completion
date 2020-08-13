@@ -80,7 +80,7 @@ int main() {
 
     double ne_theta[2];
     copy_array(initial_theta, ne_theta, 2);
-    train_normal_equation(ne_theta, &data_set);
+    normal_equation_train(ne_theta, &data_set);
     printf("Normal equation: theta[0]=%f, theta[1]=%f, squares_error=%f\n",
            ne_theta[0], ne_theta[1], squares_error(ne_theta, &data_set));
 
@@ -94,7 +94,7 @@ int main() {
             .alpha = .13333333,
             .expected_error=.02405
     };
-    train_batch_gradient_descent(&batch_gradient_descent, &data_set);
+    batch_gradient_descent_train(&batch_gradient_descent, &data_set);
     printf("Batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f, steps=%d\n",
            bgd_theta[0], bgd_theta[1], squares_error(bgd_theta, &data_set), batch_gradient_descent.steps);
 
@@ -108,7 +108,7 @@ int main() {
             .alpha = .13333333,
             .expected_error=.02405
     };
-    train_stochastic_gradient_descent(&stochastic_gradient_descent, &data_set);
+    stochastic_gradient_descent_train(&stochastic_gradient_descent, &data_set);
     printf("Stochastic gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f, steps=%d\n",
            sgd_theta[0], sgd_theta[1], squares_error(sgd_theta, &data_set), stochastic_gradient_descent.steps);
 
@@ -123,7 +123,7 @@ int main() {
             .expected_error=.02405,
             .batch_size=8
     };
-    train_mini_batch_gradient_descent(&mini_batch_gradient_descent, &data_set);
+    mini_batch_gradient_descent_train(&mini_batch_gradient_descent, &data_set);
     printf("Mini batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f, steps=%d\n",
            mbgd_theta[0], mbgd_theta[1], squares_error(mbgd_theta, &data_set), mini_batch_gradient_descent.steps);
 
