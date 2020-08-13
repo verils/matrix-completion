@@ -16,16 +16,8 @@ double squares_error(const double *theta, const DataSet *data_set) {
     return sum / 2 / data_set->size;
 }
 
-double gradient_0(const double *theta, const double x, const double y) {
-    return theta[0] + theta[1] * x - y;
-}
-
-double gradient_1(const double *theta, const double x, const double y) {
-    return (theta[0] + theta[1] * x - y) * x;
-}
-
-void simulated_annealing() {
-
+double derivative(const double *theta, const double *x, int k, double y) {
+    return (theta[0] * x[0] + theta[1] * x[1] - y) * x[k];
 }
 
 //L(a,b)=(1/2m)sum(1,m)(a+bx-y)^2
@@ -67,19 +59,20 @@ void normal_equation_train(double *theta, const DataSet *data_set) {
 
 void batch_gradient_descent_train(BatchGradientDescent *bgd, const DataSet *data_set) {
     double *theta = bgd->theta;
+
     double *features = data_set->features;
     double *results = data_set->results;
+    int size = data_set->size;
+
     while (squares_error(theta, data_set) > bgd->expected_error) {
-        double sum_gradient_0 = 0, sum_gradient_1 = 0, theta_0, theta_1;
-        for (int i = 0; i < data_set->size; ++i) {
-            sum_gradient_0 += gradient_0(theta, features[i], results[i]);
-            sum_gradient_1 += gradient_1(theta, features[i], results[i]);
+        double gradient[2] = {0};
+        for (int i = 0; i < size; ++i) {
+            double x[2] = {1, features[i]};
+            gradient[0] += derivative(theta, x, 0, results[i]) / size;
+            gradient[1] += derivative(theta, x, 1, results[i]) / size;
         }
-        double avg_0 = sum_gradient_0 / data_set->size, avg_1 = sum_gradient_1 / data_set->size;
-        theta_0 = theta[0] - bgd->alpha * avg_0;
-        theta_1 = theta[1] - bgd->alpha * avg_1;
-        theta[0] = theta_0;
-        theta[1] = theta_1;
+        theta[0] = theta[0] - bgd->alpha * gradient[0];
+        theta[1] = theta[1] - bgd->alpha * gradient[1];
         bgd->steps++;
     }
 }
@@ -107,17 +100,15 @@ void mini_batch_gradient_descent_train(MiniBatchGradientDescent *mbgd, const Dat
     int size = data_set->size;
 
     while (squares_error(theta, data_set) > mbgd->expected_error) {
-        double sum_gradient_0 = 0, sum_gradient_1 = 0, theta_0, theta_1;
+        double gradient[2] = {0};
         for (int i = 0; i < batch_size; ++i) {
             int index = rand() % size;
-            sum_gradient_0 += gradient_0(theta, features[index], results[index]);
-            sum_gradient_1 += gradient_1(theta, features[index], results[index]);
+            double x[2] = {1, features[index]};
+            gradient[0] += derivative(theta, x, 0, results[index]) / batch_size;
+            gradient[1] += derivative(theta, x, 1, results[index]) / batch_size;
         }
-        double avg_0 = sum_gradient_0 / batch_size, avg_1 = sum_gradient_1 / batch_size;
-        theta_0 = theta[0] - mbgd->alpha * avg_0;
-        theta_1 = theta[1] - mbgd->alpha * avg_1;
-        theta[0] = theta_0;
-        theta[1] = theta_1;
+        theta[0] = theta[0] - mbgd->alpha * gradient[0];
+        theta[1] = theta[1] - mbgd->alpha * gradient[1];
         mbgd->steps++;
     }
 }
