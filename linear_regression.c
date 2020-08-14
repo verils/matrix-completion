@@ -1,5 +1,7 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "linear_regression.h"
 
@@ -57,6 +59,16 @@ void normal_equation_train(double *theta, const DataSet *data_set) {
     theta[0] = (sum_y - theta[1] * sum_x) / size_d;
 }
 
+double batch_gradient_descent_optimize(double initial_learning_rate, int iterations, int mode) {
+    if (mode == OPTIMIZATION_FIXED) {
+        return initial_learning_rate;
+    } else if (mode == OPTIMIZATION_EXPONENTIAL) {
+        int exponent = iterations / 100;
+        return (double) initial_learning_rate * pow(.96, (double) exponent);
+    }
+    return initial_learning_rate;
+}
+
 void batch_gradient_descent_train(BatchGradientDescent *bgd, const DataSet *data_set) {
     double *theta = bgd->theta;
 
@@ -64,29 +76,33 @@ void batch_gradient_descent_train(BatchGradientDescent *bgd, const DataSet *data
     double *results = data_set->results;
     int size = data_set->size;
 
-    while (squares_error(theta, data_set) > bgd->expected_error) {
+    while (squares_error(theta, data_set) > bgd->expected_error && bgd->iterations < bgd->max_iterations) {
         double gradient[2] = {0};
         for (int i = 0; i < size; ++i) {
             double x[2] = {1, features[i]};
             gradient[0] += derivative(theta, x, 0, results[i]) / size;
             gradient[1] += derivative(theta, x, 1, results[i]) / size;
         }
-        theta[0] = theta[0] - bgd->alpha * gradient[0];
-        theta[1] = theta[1] - bgd->alpha * gradient[1];
-        bgd->steps++;
+
+        double learning_rate = batch_gradient_descent_optimize(
+                bgd->learning_rate, bgd->iterations, bgd->optimization_mode);
+        theta[0] = theta[0] - learning_rate * gradient[0];
+        theta[1] = theta[1] - learning_rate * gradient[1];
+        bgd->iterations++;
     }
 }
 
 void stochastic_gradient_descent_train(StochasticGradientDescent *sgd, const DataSet *data_set) {
     MiniBatchGradientDescent mbgd = {
-            .theta = sgd->theta,
+            .theta=sgd->theta,
             .dimension=sgd->dimension,
-            .alpha = sgd->alpha,
+            .learning_rate=sgd->learning_rate,
             .expected_error=sgd->expected_error,
+            .max_iterations=sgd->max_iterations,
             .batch_size=1
     };
     mini_batch_gradient_descent_train(&mbgd, data_set);
-    sgd->steps = mbgd.steps;
+    sgd->iterations = mbgd.iterations;
 }
 
 void mini_batch_gradient_descent_train(MiniBatchGradientDescent *mbgd, const DataSet *data_set) {
@@ -99,7 +115,7 @@ void mini_batch_gradient_descent_train(MiniBatchGradientDescent *mbgd, const Dat
     double *results = data_set->results;
     int size = data_set->size;
 
-    while (squares_error(theta, data_set) > mbgd->expected_error) {
+    while (squares_error(theta, data_set) > mbgd->expected_error && mbgd->iterations < mbgd->max_iterations) {
         double gradient[2] = {0};
         for (int i = 0; i < batch_size; ++i) {
             int index = rand() % size;
@@ -107,9 +123,9 @@ void mini_batch_gradient_descent_train(MiniBatchGradientDescent *mbgd, const Dat
             gradient[0] += derivative(theta, x, 0, results[index]) / batch_size;
             gradient[1] += derivative(theta, x, 1, results[index]) / batch_size;
         }
-        theta[0] = theta[0] - mbgd->alpha * gradient[0];
-        theta[1] = theta[1] - mbgd->alpha * gradient[1];
-        mbgd->steps++;
+        theta[0] = theta[0] - mbgd->learning_rate * gradient[0];
+        theta[1] = theta[1] - mbgd->learning_rate * gradient[1];
+        mbgd->iterations++;
     }
 }
 

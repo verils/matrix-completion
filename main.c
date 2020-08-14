@@ -76,7 +76,8 @@ int main() {
 
     int timer_data_prepared = timer_record(&timer);
 
-    double initial_theta[2] = {0, 0};
+    double initial_theta[2] = {1, 1};
+    int max_iterations = 300000;
 
     double ne_theta[2];
     copy_array(initial_theta, ne_theta, 2);
@@ -89,43 +90,47 @@ int main() {
     double bgd_theta[2];
     copy_array(initial_theta, bgd_theta, 2);
     BatchGradientDescent batch_gradient_descent = {
-            .theta = bgd_theta,
+            .theta=bgd_theta,
             .dimension=2,
-            .alpha = .13333333,
-            .expected_error=.02405
+            .learning_rate=.13333333,
+            .expected_error=.02405,
+            .max_iterations=max_iterations,
+            .optimization_mode=OPTIMIZATION_EXPONENTIAL
     };
     batch_gradient_descent_train(&batch_gradient_descent, &data_set);
-    printf("Batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f, steps=%d\n",
-           bgd_theta[0], bgd_theta[1], squares_error(bgd_theta, &data_set), batch_gradient_descent.steps);
+    printf("Batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f, iterations=%d\n",
+           bgd_theta[0], bgd_theta[1], squares_error(bgd_theta, &data_set), batch_gradient_descent.iterations);
 
     int timer_bgd = timer_record(&timer);
 
     double sgd_theta[2];
     copy_array(initial_theta, sgd_theta, 2);
     StochasticGradientDescent stochastic_gradient_descent = {
-            .theta = sgd_theta,
+            .theta=sgd_theta,
             .dimension=2,
-            .alpha = .13333333,
-            .expected_error=.02405
+            .learning_rate=.13333333,
+            .expected_error=.02405,
+            .max_iterations=max_iterations
     };
     stochastic_gradient_descent_train(&stochastic_gradient_descent, &data_set);
-    printf("Stochastic gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f, steps=%d\n",
-           sgd_theta[0], sgd_theta[1], squares_error(sgd_theta, &data_set), stochastic_gradient_descent.steps);
+    printf("Stochastic gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f, iterations=%d\n",
+           sgd_theta[0], sgd_theta[1], squares_error(sgd_theta, &data_set), stochastic_gradient_descent.iterations);
 
     int timer_sgd = timer_record(&timer);
 
     double mbgd_theta[2];
     copy_array(initial_theta, mbgd_theta, 2);
     MiniBatchGradientDescent mini_batch_gradient_descent = {
-            .theta = mbgd_theta,
+            .theta=mbgd_theta,
             .dimension=2,
-            .alpha = .13333333,
+            .learning_rate=.13333333,
             .expected_error=.02405,
+            .max_iterations=max_iterations,
             .batch_size=8
     };
     mini_batch_gradient_descent_train(&mini_batch_gradient_descent, &data_set);
-    printf("Mini batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f, steps=%d\n",
-           mbgd_theta[0], mbgd_theta[1], squares_error(mbgd_theta, &data_set), mini_batch_gradient_descent.steps);
+    printf("Mini batch gradient descent: theta[0]=%f, theta[1]=%f, squares_error=%f, iterations=%d\n",
+           mbgd_theta[0], mbgd_theta[1], squares_error(mbgd_theta, &data_set), mini_batch_gradient_descent.iterations);
 
     int timer_mbgd = timer_record(&timer);
 

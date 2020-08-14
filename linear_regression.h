@@ -1,3 +1,5 @@
+#define OPTIMIZATION_FIXED 0
+#define OPTIMIZATION_EXPONENTIAL 1
 
 typedef struct {
     double *features;
@@ -8,25 +10,29 @@ typedef struct {
 typedef struct {
     double *theta;
     int dimension;
-    double alpha;
+    double learning_rate;
     double expected_error;
-    int steps;
+    int max_iterations;
+    int iterations;
+    int optimization_mode;
 } BatchGradientDescent;
 
 typedef struct {
     double *theta;
     int dimension;
-    double alpha;
+    double learning_rate;
     double expected_error;
-    int steps;
+    int max_iterations;
+    int iterations;
 } StochasticGradientDescent;
 
 typedef struct {
     double *theta;
     int dimension;
-    double alpha;
+    double learning_rate;
     double expected_error;
-    int steps;
+    int max_iterations;
+    int iterations;
     int batch_size;
 } MiniBatchGradientDescent;
 
